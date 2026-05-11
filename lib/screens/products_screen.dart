@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:marketplace_app/screens/add_product_screen.dart';
+import 'place_order_screen.dart';
 import '../controllers/product_controller.dart';
+import '../controllers/order_controller.dart';
 
 class ProductsScreen extends StatelessWidget {
   const ProductsScreen({super.key});
@@ -31,15 +33,22 @@ class ProductsScreen extends StatelessWidget {
                 title: Text(product['name']),
                 subtitle: Text(product['description']),
                 trailing: Text('\$${product['price']}'),
+                onTap: () {                          // 👈 Added
+                  Get.put(OrderController());
+                  Get.to(
+                    () => PlaceOrderScreen(),
+                    arguments: product,
+                  );
+                },
               ),
             );
           },
         );
       }),
       floatingActionButton: FloatingActionButton(
-      onPressed: () => Get.to(() => AddProductScreen()),
-      child: const Icon(Icons.add),
-     ) 
+        onPressed: () => Get.to(() => AddProductScreen()),
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }
