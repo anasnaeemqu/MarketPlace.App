@@ -5,7 +5,7 @@ import '../screens/products_screen.dart';
 
 class AuthController extends GetxController {
   final String baseUrl = 'http://localhost:5033/api';
-  String token = '';
+  String token = ''; // 👈 plain String, no .obs
 
   Future<void> login(String email, String password) async {
     try {
@@ -20,9 +20,10 @@ class AuthController extends GetxController {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        token = data['token'];
+        token = data['token']; // 👈 plain assignment
+        print('Token saved: $token');
         Get.snackbar('Success', 'Logged in successfully!');
-        Get.off(() => ProductsScreen()); // 👈 Navigate to Products
+        Get.off(() => ProductsScreen());
       } else {
         Get.snackbar('Error', 'Invalid email or password');
       }

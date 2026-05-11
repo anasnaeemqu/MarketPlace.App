@@ -40,6 +40,10 @@ class ProductController extends GetxController {
   ) async {
     try {
       final token = Get.find<AuthController>().token;
+      // final token = Get.find<AuthController>().token.value;
+       print('Token being used: $token'); // 👈 Add this
+       print('Token length: ${token.length}');
+
       final response = await http.post(
         Uri.parse('$baseUrl/Products'),
         headers: {
@@ -56,10 +60,23 @@ class ProductController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        Get.snackbar('Success', 'Product added!');
-        fetchProducts();
-        Get.back();
-      } else {
+  print('Status code: ${response.statusCode}');
+  print('Body: ${response.body}');
+  
+  await fetchProducts();
+  
+  Get.snackbar(
+    'Success',
+    'Product added!',
+    snackPosition: SnackPosition.BOTTOM,
+    duration: const Duration(seconds: 3),
+  );
+
+  await Future.delayed(const Duration(milliseconds: 1000));
+  Get.back();
+} else {
+        print('Error: ${response.statusCode}');
+        print('Body: ${response.body}');
         Get.snackbar('Error', 'Could not add product');
       }
     } catch (e) {
