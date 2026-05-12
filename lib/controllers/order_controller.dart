@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'auth_controller.dart';
+import '../screens/products_screen.dart';
 
 class OrderController extends GetxController {
   final String baseUrl = 'http://localhost:5033/api';
@@ -46,7 +47,7 @@ class OrderController extends GetxController {
           duration: const Duration(seconds: 3),
         );
         await Future.delayed(const Duration(milliseconds: 500));
-        Get.back();
+        Get.off(() => const ProductsScreen());
       } else {
         print('Error: ${response.statusCode}');
         print('Body: ${response.body}');
