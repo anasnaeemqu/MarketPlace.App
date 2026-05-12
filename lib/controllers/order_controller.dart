@@ -11,8 +11,11 @@ class OrderController extends GetxController {
     double price,
     int quantity,
   ) async {
+     print('placeOrder function started!');
     try {
+      print('Placing order...');
       final token = Get.find<AuthController>().token;
+      print('Token length: ${token.length}');
 
       final response = await http.post(
         Uri.parse('$baseUrl/Orders'),
@@ -31,6 +34,9 @@ class OrderController extends GetxController {
           ]
         }),
       );
+      print('Order status: ${response.statusCode}');
+      print('Order body: ${response.body}');
+
 
       if (response.statusCode == 200) {
         Get.snackbar(

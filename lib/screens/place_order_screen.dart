@@ -5,6 +5,7 @@ import '../controllers/order_controller.dart';
 class PlaceOrderScreen extends StatelessWidget {
   final quantityController = TextEditingController();
   final product = Get.arguments;
+  final orderController = Get.put(OrderController()); // 👈 Changed to Get.put
 
   PlaceOrderScreen({super.key});
 
@@ -31,15 +32,17 @@ class PlaceOrderScreen extends StatelessWidget {
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
-                  print('Button pressed!'); // 👈 Add this
-                  print('Product: $product'); // 👈 Add this
-    
-                  if (quantityController.text.isEmpty) {
+                print('Button pressed!');
+                print('Quantity text: "${quantityController.text}"'); 
+
+                if (quantityController.text.isEmpty) {
                   Get.snackbar('Error', 'Please enter quantity',
-                 snackPosition: SnackPosition.BOTTOM);
-                 return;
+                      snackPosition: SnackPosition.BOTTOM);
+                  return;
                 }
-                Get.find<OrderController>().placeOrder(
+                print('Calling placeOrder...');
+
+                orderController.placeOrder( // 👈 Use local instance
                   product['id'],
                   double.parse(product['price'].toString()),
                   int.parse(quantityController.text),
