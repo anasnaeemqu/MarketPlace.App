@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:marketplace_app/controllers/auth_controller.dart';
 import 'add_product_screen.dart';
 import 'place_order_screen.dart';
 import '../controllers/product_controller.dart';
@@ -22,6 +23,14 @@ class ProductsScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF0077B6),
         foregroundColor: Colors.white,
         elevation: 0,
+          actions: [
+    IconButton(
+      icon: const Icon(Icons.logout),
+      onPressed: () {
+        Get.find<AuthController>().logout();
+      },
+    ),
+  ],
       ),
       body: Obx(() {
         if (controller.isLoading.value) {

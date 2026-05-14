@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:marketplace_app/screens/login_screen.dart';
 import '../screens/products_screen.dart';
 
 class AuthController extends GetxController {
@@ -32,4 +33,9 @@ class AuthController extends GetxController {
       print(e);
     }
   }
+
+  void logout() {
+  token = '';
+  Get.offAll(() => LoginScreen());
+}
 }
