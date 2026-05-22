@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:marketplace_app/screens/login_screen.dart';
@@ -37,5 +38,44 @@ class AuthController extends GetxController {
   void logout() {
   token = '';
   Get.offAll(() => LoginScreen());
+}
+
+Future<void> register(
+  String name,
+  String email,
+  String password,
+  String role,
+) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$baseUrl/Auth/register'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'name': name,
+        'email': email,
+        'password': password,
+        'role': role,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      Get.snackbar(
+        'Success',
+        'Account created! Please login.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+      await Future.delayed(const Duration(milliseconds: 500));
+      Get.back();
+    } else {
+      Get.snackbar('Error', 'Could not register',
+          snackPosition: SnackPosition.BOTTOM);
+    }
+  } catch (e) {
+    Get.snackbar('Error', 'Could not connect to server',
+        snackPosition: SnackPosition.BOTTOM);
+    print(e);
+  }
 }
 }

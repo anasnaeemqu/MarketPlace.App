@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:marketplace_app/screens/register_screen.dart';
 import '../controllers/auth_controller.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -94,6 +95,24 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    const Text("Don't have an account? ",
+        style: TextStyle(color: Colors.grey)),
+    GestureDetector(
+      onTap: () => Get.to(() => RegisterScreen()),
+      child: const Text(
+        'Register',
+        style: TextStyle(
+          color: Color(0xFF0077B6),
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ),
+  ],
+),
             ],
           ),
         ),
