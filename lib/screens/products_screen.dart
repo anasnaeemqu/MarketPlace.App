@@ -17,9 +17,9 @@ class ProductsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFEEF9FF),
       appBar: AppBar(
-        title: const Text(
-          'Marketplace',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          'Hi, ${Get.find<AuthController>().userName}! 👋',
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: const Color(0xFF0077B6),
         foregroundColor: Colors.white,
@@ -31,9 +31,7 @@ class ProductsScreen extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () {
-              Get.find<AuthController>().logout();
-            },
+            onPressed: () => Get.find<AuthController>().logout(),
           ),
         ],
       ),
@@ -48,8 +46,7 @@ class ProductsScreen extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: 'Search products...',
                 hintStyle: const TextStyle(color: Colors.grey),
-                prefixIcon:
-                    const Icon(Icons.search, color: Color(0xFF0077B6)),
+                prefixIcon: const Icon(Icons.search, color: Color(0xFF0077B6)),
                 filled: true,
                 fillColor: Colors.white,
                 border: OutlineInputBorder(
@@ -66,8 +63,7 @@ class ProductsScreen extends StatelessWidget {
             child: Obx(() {
               if (controller.isLoading.value) {
                 return const Center(
-                  child:
-                      CircularProgressIndicator(color: Color(0xFF0077B6)),
+                  child: CircularProgressIndicator(color: Color(0xFF0077B6)),
                 );
               }
 
@@ -78,9 +74,10 @@ class ProductsScreen extends StatelessWidget {
                     children: [
                       Icon(Icons.search_off, size: 80, color: Colors.grey),
                       SizedBox(height: 16),
-                      Text('No products found',
-                          style:
-                              TextStyle(color: Colors.grey, fontSize: 16)),
+                      Text(
+                        'No products found',
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                      ),
                     ],
                   ),
                 );
@@ -109,8 +106,10 @@ class ProductsScreen extends StatelessWidget {
                             color: const Color(0xFF00B4D8).withOpacity(0.15),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Icon(Icons.inventory,
-                              color: Color(0xFF0077B6)),
+                          child: const Icon(
+                            Icons.inventory,
+                            color: Color(0xFF0077B6),
+                          ),
                         ),
                         title: Text(
                           product['name'],
@@ -120,13 +119,17 @@ class ProductsScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 4),
-                            Text(product['description'],
-                                style: const TextStyle(color: Colors.grey)),
+                            Text(
+                              product['description'],
+                              style: const TextStyle(color: Colors.grey),
+                            ),
                             const SizedBox(height: 4),
                             Text(
                               'Stock: ${product['stock']}',
                               style: const TextStyle(
-                                  color: Colors.teal, fontSize: 12),
+                                color: Colors.teal,
+                                fontSize: 12,
+                              ),
                             ),
                           ],
                         ),
@@ -142,17 +145,18 @@ class ProductsScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 4),
-                            const Text('Buy',
-                                style: TextStyle(
-                                    color: Colors.grey, fontSize: 12)),
+                            const Text(
+                              'Buy',
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 12,
+                              ),
+                            ),
                           ],
                         ),
                         onTap: () {
                           Get.put(OrderController());
-                          Get.to(
-                            () => PlaceOrderScreen(),
-                            arguments: product,
-                          );
+                          Get.to(() => PlaceOrderScreen(), arguments: product);
                         },
                       ),
                     );
@@ -167,8 +171,7 @@ class ProductsScreen extends StatelessWidget {
         onPressed: () => Get.to(() => AddProductScreen()),
         backgroundColor: const Color(0xFF0077B6),
         icon: const Icon(Icons.add, color: Colors.white),
-        label:
-            const Text('Add Product', style: TextStyle(color: Colors.white)),
+        label: const Text('Add Product', style: TextStyle(color: Colors.white)),
       ),
     );
   }
