@@ -75,15 +75,17 @@ class RegisterScreen extends StatelessWidget {
                   value: selectedRole,
                   decoration: const InputDecoration(
                     labelText: 'Role',
-                    prefixIcon: Icon(Icons.badge_outlined,
-                        color: Color(0xFF0077B6)),
+                    prefixIcon: Icon(
+                      Icons.badge_outlined,
+                      color: Color(0xFF0077B6),
+                    ),
                     border: InputBorder.none,
                   ),
                   items: ['Customer', 'Vendor', 'Admin']
-                      .map((role) => DropdownMenuItem(
-                            value: role,
-                            child: Text(role),
-                          ))
+                      .map(
+                        (role) =>
+                            DropdownMenuItem(value: role, child: Text(role)),
+                      )
                       .toList(),
                   onChanged: (value) {
                     selectedRole = value!;
@@ -127,8 +129,7 @@ class RegisterScreen extends StatelessWidget {
                   ),
                   child: const Text(
                     'Register',
-                    style: TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -138,8 +139,10 @@ class RegisterScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Already have an account? ',
-                      style: TextStyle(color: Colors.grey)),
+                  const Text(
+                    'Already have an account? ',
+                    style: TextStyle(color: Colors.grey),
+                  ),
                   GestureDetector(
                     onTap: () => Get.back(),
                     child: const Text(
@@ -181,8 +184,7 @@ class RegisterScreen extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:
-              const BorderSide(color: Color(0xFF00B4D8), width: 2),
+          borderSide: const BorderSide(color: Color(0xFF00B4D8), width: 2),
         ),
       ),
     );
