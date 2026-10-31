@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:marketplace_app/controllers/auth_controller.dart';
 import '../controllers/order_controller.dart';
 
 class PlaceOrderScreen extends StatelessWidget {
@@ -27,7 +28,6 @@ class PlaceOrderScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             // PRODUCT CARD
             Container(
               width: double.infinity,
@@ -55,8 +55,11 @@ class PlaceOrderScreen extends StatelessWidget {
                           color: const Color(0xFF00B4D8).withOpacity(0.15),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(Icons.inventory,
-                            color: Color(0xFF0077B6), size: 30),
+                        child: const Icon(
+                          Icons.inventory,
+                          color: Color(0xFF0077B6),
+                          size: 30,
+                        ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -86,8 +89,10 @@ class PlaceOrderScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Price per item',
-                          style: TextStyle(color: Colors.grey)),
+                      const Text(
+                        'Price per item',
+                        style: TextStyle(color: Colors.grey),
+                      ),
                       Text(
                         '\$${product['price']}',
                         style: const TextStyle(
@@ -102,8 +107,10 @@ class PlaceOrderScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Available Stock',
-                          style: TextStyle(color: Colors.grey)),
+                      const Text(
+                        'Available Stock',
+                        style: TextStyle(color: Colors.grey),
+                      ),
                       Text(
                         '${product['stock']} items',
                         style: const TextStyle(color: Colors.teal),
@@ -130,8 +137,7 @@ class PlaceOrderScreen extends StatelessWidget {
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: 'Enter quantity',
-                prefixIcon: const Icon(Icons.numbers,
-                    color: Color(0xFF0077B6)),
+                prefixIcon: const Icon(Icons.numbers, color: Color(0xFF0077B6)),
                 filled: true,
                 fillColor: Colors.white,
                 border: OutlineInputBorder(
@@ -140,8 +146,10 @@ class PlaceOrderScreen extends StatelessWidget {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide:
-                      const BorderSide(color: Color(0xFF00B4D8), width: 2),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF00B4D8),
+                    width: 2,
+                  ),
                 ),
               ),
             ),
@@ -151,10 +159,20 @@ class PlaceOrderScreen extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               height: 50,
-              child: ElevatedButton.icon(
+              child: // In the Place Order button onPressed:
+              ElevatedButton.icon(
                 onPressed: () {
-                  print('Button pressed!');
-                  print('Quantity text: "${quantityController.text}"');
+                  // Check if user is Customer 👇
+                  if (Get.find<AuthController>().userRole == 'Vendor') {
+                    Get.snackbar(
+                      'Not allowed',
+                      'Vendors cannot place orders!',
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.red,
+                      colorText: Colors.white,
+                    );
+                    return;
+                  }
 
                   if (quantityController.text.isEmpty) {
                     Get.snackbar(
@@ -167,7 +185,6 @@ class PlaceOrderScreen extends StatelessWidget {
                     return;
                   }
 
-                  print('Calling placeOrder...');
                   orderController.placeOrder(
                     product['id'],
                     double.parse(product['price'].toString()),
@@ -184,8 +201,7 @@ class PlaceOrderScreen extends StatelessWidget {
                 icon: const Icon(Icons.shopping_cart_checkout),
                 label: const Text(
                   'Place Order',
-                  style: TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ),

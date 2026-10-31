@@ -167,12 +167,19 @@ class ProductsScreen extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Get.to(() => AddProductScreen()),
-        backgroundColor: const Color(0xFF0077B6),
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Add Product', style: TextStyle(color: Colors.white)),
-      ),
+      floatingActionButton:
+          Get.find<AuthController>().userRole == 'Vendor' ||
+              Get.find<AuthController>().userRole == 'Admin'
+          ? FloatingActionButton.extended(
+              onPressed: () => Get.to(() => AddProductScreen()),
+              backgroundColor: const Color(0xFF0077B6),
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: const Text(
+                'Add Product',
+                style: TextStyle(color: Colors.white),
+              ),
+            )
+          : null, // 👈 Hide button for Customers
     );
   }
 }
