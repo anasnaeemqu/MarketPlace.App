@@ -2,13 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/order_controller.dart';
 
-class OrdersScreen extends StatelessWidget {
+class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final OrderController controller = Get.put(OrderController());
+  State<OrdersScreen> createState() => _OrdersScreenState();
+}
 
+class _OrdersScreenState extends State<OrdersScreen> {
+  final OrderController controller = Get.put(OrderController());
+
+  @override
+  void initState() {
+    super.initState();
+    controller.fetchOrders(); // 👈 fresh data every time the screen opens
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFEEF9FF),
       appBar: AppBar(
@@ -32,11 +43,12 @@ class OrdersScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.receipt_long_outlined,
-                    size: 80, color: Colors.grey),
+                Icon(Icons.receipt_long_outlined, size: 80, color: Colors.grey),
                 SizedBox(height: 16),
-                Text('No orders yet',
-                    style: TextStyle(color: Colors.grey, fontSize: 16)),
+                Text(
+                  'No orders yet',
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                ),
               ],
             ),
           );
@@ -74,7 +86,9 @@ class OrdersScreen extends StatelessWidget {
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.teal.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(20),
@@ -82,9 +96,10 @@ class OrdersScreen extends StatelessWidget {
                           child: Text(
                             order['status'],
                             style: const TextStyle(
-                                color: Colors.teal,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12),
+                              color: Colors.teal,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
                       ],
@@ -99,39 +114,43 @@ class OrdersScreen extends StatelessWidget {
                     const Divider(height: 20),
 
                     // ORDER ITEMS
-                    ...items.map((item) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  const Icon(Icons.inventory,
-                                      color: Color(0xFF00B4D8), size: 16),
-                                  const SizedBox(width: 8),
-                                  Text('Product #${item['productId']}'),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    'x${item['quantity']}',
-                                    style:
-                                        const TextStyle(color: Colors.grey),
+                    ...items.map(
+                      (item) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.inventory,
+                                  color: Color(0xFF00B4D8),
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 8),
+                                Text('Product #${item['productId']}'),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  'x${item['quantity']}',
+                                  style: const TextStyle(color: Colors.grey),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  '\$${item['price']}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF0077B6),
                                   ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    '\$${item['price']}',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF0077B6),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        )),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
