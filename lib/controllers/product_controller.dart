@@ -6,9 +6,10 @@ import '../controllers/auth_controller.dart';
 class ProductController extends GetxController {
   final String baseUrl = 'http://localhost:5033/api';
   var products = [].obs;
-  var filteredProducts = [].obs; // 👈 Add this
+  var filteredProducts = [].obs;
   var isLoading = true.obs;
-  var searchQuery = ''.obs; // 👈 Add this
+  var searchQuery = ''.obs;
+  var isSaving = false.obs;
 
   @override
   void onInit() {
@@ -19,9 +20,7 @@ class ProductController extends GetxController {
   Future<void> fetchProducts() async {
     try {
       isLoading(true);
-      final response = await http.get(
-        Uri.parse('$baseUrl/Products'),
-      );
+      final response = await http.get(Uri.parse('$baseUrl/Products'));
 
       if (response.statusCode == 200) {
         products.value = jsonDecode(response.body);
@@ -45,8 +44,7 @@ class ProductController extends GetxController {
         final name = product['name'].toString().toLowerCase();
         final description = product['description'].toString().toLowerCase();
         final searchLower = query.toLowerCase();
-        return name.contains(searchLower) ||
-            description.contains(searchLower);
+        return name.contains(searchLower) || description.contains(searchLower);
       }).toList();
     }
   }
@@ -57,10 +55,11 @@ class ProductController extends GetxController {
     double price,
     int stock,
   ) async {
+    if (isSaving.value) return; // 🚪 busy? walk away
+    isSaving(true); // 🔒 Occupied
+
     try {
       final token = Get.find<AuthController>().token;
-      print('Token being used: $token');
-      print('Token length: ${token.length}');
 
       final response = await http.post(
         Uri.parse('$baseUrl/Products'),
@@ -73,33 +72,34 @@ class ProductController extends GetxController {
           'description': description,
           'price': price,
           'stock': stock,
-          'vendorId': '1',
+          'vendorId': 'set-by-server',
         }),
       );
 
       if (response.statusCode == 200) {
-        print('Status code: ${response.statusCode}');
-        print('Body: ${response.body}');
-
         await fetchProducts();
-
+        Get.back();
+        await Future.delayed(const Duration(milliseconds: 300));
         Get.snackbar(
           'Success',
           'Product added!',
           snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 3),
         );
-
-        await Future.delayed(const Duration(milliseconds: 500));
-        Get.back();
       } else {
-        print('Error: ${response.statusCode}');
-        print('Body: ${response.body}');
-        Get.snackbar('Error', 'Could not add product');
+        Get.snackbar(
+          'Error',
+          'Could not add product',
+          snackPosition: SnackPosition.BOTTOM,
+        );
       }
     } catch (e) {
-      Get.snackbar('Error', 'Could not connect to server');
-      print(e);
+      Get.snackbar(
+        'Error',
+        'Could not connect to server',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isSaving(false); // 🔓 ALWAYS flip back
     }
   }
 }

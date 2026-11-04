@@ -81,7 +81,7 @@ class RegisterScreen extends StatelessWidget {
                     ),
                     border: InputBorder.none,
                   ),
-                  items: ['Customer', 'Vendor', 'Admin']
+                  items: ['Customer', 'Vendor']
                       .map(
                         (role) =>
                             DropdownMenuItem(value: role, child: Text(role)),

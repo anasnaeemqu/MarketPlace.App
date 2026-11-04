@@ -9,6 +9,7 @@ class OrderController extends GetxController {
   final String baseUrl = 'http://localhost:5033/api';
   var orders = [].obs;
   var isLoading = false.obs;
+  var isPlacing = false.obs;
 
   @override
   void onInit() {
@@ -34,11 +35,9 @@ class OrderController extends GetxController {
     }
   }
 
-  Future<void> placeOrder(
-    int productId,
-    double price,
-    int quantity,
-  ) async {
+  Future<void> placeOrder(int productId, double price, int quantity) async {
+    if (isPlacing.value) return;
+    isPlacing(true);
     try {
       print('placeOrder function started!');
       final token = Get.find<AuthController>().token;
@@ -53,12 +52,8 @@ class OrderController extends GetxController {
         body: jsonEncode({
           'customerId': 1,
           'items': [
-            {
-              'productId': productId,
-              'quantity': quantity,
-              'price': price,
-            }
-          ]
+            {'productId': productId, 'quantity': quantity, 'price': price},
+          ],
         }),
       );
 
@@ -77,13 +72,21 @@ class OrderController extends GetxController {
           colorText: const Color(0xFFFFFFFF),
         );
       } else {
-        Get.snackbar('Error', 'Could not place order',
-            snackPosition: SnackPosition.BOTTOM);
+        Get.snackbar(
+          'Error',
+          'Could not place order',
+          snackPosition: SnackPosition.BOTTOM,
+        );
       }
     } catch (e) {
-      Get.snackbar('Error', 'Could not connect to server',
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Error',
+        'Could not connect to server',
+        snackPosition: SnackPosition.BOTTOM,
+      );
       print(e);
+    } finally {
+      isPlacing(false);
     }
   }
 }

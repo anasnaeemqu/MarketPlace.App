@@ -82,44 +82,59 @@ class AddProductScreen extends StatelessWidget {
             const SizedBox(height: 32),
 
             // ADD BUTTON
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  if (nameController.text.isEmpty ||
-                      descController.text.isEmpty ||
-                      priceController.text.isEmpty ||
-                      stockController.text.isEmpty) {
-                    Get.snackbar(
-                      'Error',
-                      'Please fill all fields',
-                      snackPosition: SnackPosition.BOTTOM,
-                      backgroundColor: Colors.red,
-                      colorText: Colors.white,
-                    );
-                    return;
-                  }
+            Obx(
+              () => SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton.icon(
+                  onPressed: controller.isSaving.value
+                      ? null
+                      : () {
+                          if (nameController.text.isEmpty ||
+                              descController.text.isEmpty ||
+                              priceController.text.isEmpty ||
+                              stockController.text.isEmpty) {
+                            Get.snackbar(
+                              'Error',
+                              'Please fill all fields',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Colors.red,
+                              colorText: Colors.white,
+                            );
+                            return;
+                          }
 
-                  controller.addProduct(
-                    nameController.text,
-                    descController.text,
-                    double.parse(priceController.text),
-                    int.parse(stockController.text),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0077B6),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                          controller.addProduct(
+                            nameController.text,
+                            descController.text,
+                            double.parse(priceController.text),
+                            int.parse(stockController.text),
+                          );
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0077B6),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                ),
-                icon: const Icon(Icons.add),
-                label: const Text(
-                  'Add Product',
-                  style: TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
+                  icon: controller.isSaving.value
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.add),
+                  label: Text(
+                    controller.isSaving.value ? 'Saving...' : 'Add Product',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ),

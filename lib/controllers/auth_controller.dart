@@ -8,11 +8,14 @@ import '../screens/login_screen.dart';
 class AuthController extends GetxController {
   final String baseUrl = 'http://localhost:5033/api';
   String token = '';
-  String userName = ''; // Add this
-  String userRole = ''; // Add this
-  int userId = 0; // Add this
+  String userName = '';
+  String userRole = '';
+  int userId = 0;
+  var isLoading = false.obs;
 
   Future<void> login(String email, String password) async {
+    if (isLoading.value) return; // ignore taps while busy
+    isLoading(true);
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/Auth/login'),
@@ -23,12 +26,11 @@ class AuthController extends GetxController {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         token = data['token'];
-        userName = data['name']; // Save name
-        userRole = data['role']; // Save role
-        userId = data['userId']; // Save userId
-        print('Token saved: $token');
+        userName = data['name'];
+        userRole = data['role'];
+        userId = data['userId'];
         Get.snackbar(
-          'Welcome back $userName!', // Show name
+          'Welcome back $userName!',
           'Logged in successfully!',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFF0077B6),
@@ -37,10 +39,9 @@ class AuthController extends GetxController {
         await Future.delayed(const Duration(milliseconds: 500));
         Get.off(() => ProductsScreen());
       } else {
-        final error = jsonDecode(response.body);
         Get.snackbar(
           'Error',
-          error.toString(),
+          response.body,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
@@ -52,7 +53,8 @@ class AuthController extends GetxController {
         'Could not connect to server',
         snackPosition: SnackPosition.BOTTOM,
       );
-      print(e);
+    } finally {
+      isLoading(false); // always runs, success or failure
     }
   }
 

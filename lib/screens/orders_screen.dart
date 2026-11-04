@@ -15,7 +15,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   @override
   void initState() {
     super.initState();
-    controller.fetchOrders(); // 👈 fresh data every time the screen opens
+    controller.fetchOrders(); // fresh data every time the screen opens
   }
 
   @override
