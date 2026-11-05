@@ -128,9 +128,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                   size: 16,
                                 ),
                                 const SizedBox(width: 8),
-                                Text('Product #${item['productId']}'),
+                                Text(
+                                  '${item['productName'] ?? 'Product #${item['productId']}'}',
+                                ),
                               ],
                             ),
+
                             Row(
                               children: [
                                 Text(

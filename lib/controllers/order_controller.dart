@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'auth_controller.dart';
-import '../screens/products_screen.dart';
 
 class OrderController extends GetxController {
   final String baseUrl = 'http://localhost:5033/api';
