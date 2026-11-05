@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:marketplace_app/controllers/product_controller.dart';
 import 'auth_controller.dart';
 
 class OrderController extends GetxController {
@@ -60,6 +61,7 @@ class OrderController extends GetxController {
       print('Order body: ${response.body}');
 
       if (response.statusCode == 200) {
+        Get.find<ProductController>().fetchProducts();
         Get.back();
         await Future.delayed(const Duration(milliseconds: 300));
         Get.snackbar(
