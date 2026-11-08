@@ -3,9 +3,9 @@ import 'package:get/get.dart';
 import 'package:marketplace_app/controllers/auth_controller.dart';
 import 'package:marketplace_app/screens/orders_screen.dart';
 import 'add_product_screen.dart';
-import 'place_order_screen.dart';
 import '../controllers/product_controller.dart';
 import '../controllers/order_controller.dart';
+import 'product_detail_screen.dart';
 
 class ProductsScreen extends StatelessWidget {
   const ProductsScreen({super.key});
@@ -154,10 +154,10 @@ class ProductsScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                        onTap: () {
-                          Get.put(OrderController());
-                          Get.to(() => PlaceOrderScreen(), arguments: product);
-                        },
+                        onTap: () => Get.to(
+                          () => const ProductDetailScreen(),
+                          arguments: product,
+                        ),
                       ),
                     );
                   },
