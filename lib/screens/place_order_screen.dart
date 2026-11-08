@@ -174,10 +174,11 @@ class PlaceOrderScreen extends StatelessWidget {
                     return;
                   }
 
-                  if (quantityController.text.isEmpty) {
+                  final qty = int.tryParse(quantityController.text);
+                  if (qty == null || qty <= 0) {
                     Get.snackbar(
                       'Error',
-                      'Please enter quantity',
+                      'Enter a valid quantity (1 or more)',
                       snackPosition: SnackPosition.BOTTOM,
                       backgroundColor: Colors.red,
                       colorText: Colors.white,
