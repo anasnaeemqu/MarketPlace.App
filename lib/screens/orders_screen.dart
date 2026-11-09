@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/order_controller.dart';
+import '../controllers/auth_controller.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -16,6 +17,17 @@ class _OrdersScreenState extends State<OrdersScreen> {
   void initState() {
     super.initState();
     controller.fetchOrders(); // fresh data every time the screen opens
+  }
+
+  Color _statusColor(String status) {
+    switch (status) {
+      case 'Shipped':
+        return Colors.orange;
+      case 'Delivered':
+        return Colors.green;
+      default:
+        return Colors.teal;
+    }
   }
 
   @override
@@ -90,6 +102,26 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
+                            color: _statusColor(
+                              order['status'],
+                            ).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            order['status'],
+                            style: TextStyle(
+                              color: _statusColor(order['status']),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
                             color: Colors.teal.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -154,6 +186,30 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         ),
                       ),
                     ),
+                    if (Get.find<AuthController>().userRole == 'Admin' &&
+                        order['status'] != 'Delivered') ...[
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: ElevatedButton(
+                          onPressed: () => controller.updateStatus(
+                            order['id'],
+                            order['status'] == 'Pending'
+                                ? 'Shipped'
+                                : 'Delivered',
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0077B6),
+                            foregroundColor: Colors.white,
+                          ),
+                          child: Text(
+                            order['status'] == 'Pending'
+                                ? 'Mark as Shipped'
+                                : 'Mark as Delivered',
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

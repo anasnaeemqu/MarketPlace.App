@@ -90,4 +90,39 @@ class OrderController extends GetxController {
       isPlacing(false);
     }
   }
+
+  Future<void> updateStatus(int orderId, String newStatus) async {
+    try {
+      final token = Get.find<AuthController>().token;
+      final response = await http.put(
+        Uri.parse('$baseUrl/Orders/$orderId/status'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'status': newStatus}),
+      );
+
+      if (response.statusCode == 200) {
+        await fetchOrders();
+        Get.snackbar(
+          'Updated',
+          'Order #$orderId is now $newStatus',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          response.body,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Could not connect to server',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
 }
