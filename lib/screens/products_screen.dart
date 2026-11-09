@@ -6,6 +6,7 @@ import 'add_product_screen.dart';
 import '../controllers/product_controller.dart';
 import '../controllers/order_controller.dart';
 import 'product_detail_screen.dart';
+import 'my_products_screen.dart';
 
 class ProductsScreen extends StatelessWidget {
   const ProductsScreen({super.key});
@@ -33,6 +34,11 @@ class ProductsScreen extends StatelessWidget {
             icon: const Icon(Icons.logout),
             onPressed: () => Get.find<AuthController>().logout(),
           ),
+          if (Get.find<AuthController>().userRole != 'Customer')
+            IconButton(
+              icon: const Icon(Icons.storefront),
+              onPressed: () => Get.to(() => const MyProductsScreen()),
+            ),
         ],
       ),
       body: Column(

@@ -10,6 +10,8 @@ class ProductController extends GetxController {
   var isLoading = true.obs;
   var searchQuery = ''.obs;
   var isSaving = false.obs;
+  var myProducts = [].obs;
+  var isLoadingMine = false.obs;
 
   @override
   void onInit() {
@@ -100,6 +102,112 @@ class ProductController extends GetxController {
       );
     } finally {
       isSaving(false); // 🔓 ALWAYS flip back
+    }
+  }
+
+  Future<void> fetchMyProducts() async {
+    try {
+      isLoadingMine(true);
+      final token = Get.find<AuthController>().token;
+      final response = await http.get(
+        Uri.parse('$baseUrl/Products/mine'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      print('Mine status: ${response.statusCode}');
+      print('Mine body: ${response.body}');
+      if (response.statusCode == 200) {
+        myProducts.value = jsonDecode(response.body);
+      }
+    } catch (e) {
+      print(e);
+    } finally {
+      isLoadingMine(false);
+    }
+  }
+
+  Future<void> updateProduct(
+    int id,
+    String name,
+    String description,
+    double price,
+    int stock,
+  ) async {
+    if (isSaving.value) return;
+    isSaving(true);
+    try {
+      final token = Get.find<AuthController>().token;
+      final response = await http.put(
+        Uri.parse('$baseUrl/Products/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'name': name,
+          'description': description,
+          'price': price,
+          'stock': stock,
+          'vendorId':
+              'ignored-by-server', // model requires it, server ignores it
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        await fetchProducts();
+        await fetchMyProducts();
+        Get.back();
+        await Future.delayed(const Duration(milliseconds: 300));
+        Get.snackbar(
+          'Success',
+          'Product updated!',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          'Could not update product',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Could not connect to server',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isSaving(false);
+    }
+  }
+
+  Future<void> deleteProduct(int id) async {
+    try {
+      final token = Get.find<AuthController>().token;
+      final response = await http.delete(
+        Uri.parse('$baseUrl/Products/$id'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (response.statusCode == 200) {
+        await fetchProducts();
+        await fetchMyProducts();
+        Get.snackbar(
+          'Deleted',
+          'Product removed',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          'Could not delete product',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Could not connect to server',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 }
