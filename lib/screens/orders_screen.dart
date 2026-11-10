@@ -25,6 +25,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
         return Colors.orange;
       case 'Delivered':
         return Colors.green;
+      case 'Cancelled':
+        return Colors.red;
       default:
         return Colors.teal;
     }
@@ -187,7 +189,34 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       ),
                     ),
                     if (Get.find<AuthController>().userRole == 'Admin' &&
-                        order['status'] != 'Delivered') ...[
+                        order['status'] != 'Delivered' &&
+                        order['status'] != 'Cancelled') ...[
+                      if (Get.find<AuthController>().userRole == 'Customer' &&
+                          order['status'] == 'Pending') ...[
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: OutlinedButton(
+                            onPressed: () => Get.defaultDialog(
+                              title: 'Cancel order?',
+                              middleText:
+                                  'Order #${order['id']} will be cancelled.',
+                              textConfirm: 'Yes, cancel',
+                              textCancel: 'Keep it',
+                              confirmTextColor: Colors.white,
+                              buttonColor: Colors.red,
+                              onConfirm: () {
+                                Get.back(); // close dialog
+                                controller.cancelOrder(order['id']);
+                              },
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.red,
+                            ),
+                            child: const Text('Cancel Order'),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 8),
                       Align(
                         alignment: Alignment.centerRight,

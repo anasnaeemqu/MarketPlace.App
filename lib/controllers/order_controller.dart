@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:marketplace_app/controllers/product_controller.dart';
 import 'auth_controller.dart';
+import 'product_controller.dart';
 
 class OrderController extends GetxController {
   final String baseUrl = 'http://localhost:5033/api';
@@ -108,6 +109,40 @@ class OrderController extends GetxController {
         Get.snackbar(
           'Updated',
           'Order #$orderId is now $newStatus',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          response.body,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Could not connect to server',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  Future<void> cancelOrder(int orderId) async {
+    try {
+      final token = Get.find<AuthController>().token;
+      final response = await http.put(
+        Uri.parse('$baseUrl/Orders/$orderId/cancel'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        await fetchOrders();
+        if (Get.isRegistered<ProductController>()) {
+          Get.find<ProductController>().fetchProducts(); // stock is back
+        }
+        Get.snackbar(
+          'Cancelled',
+          'Order #$orderId was cancelled',
           snackPosition: SnackPosition.BOTTOM,
         );
       } else {
