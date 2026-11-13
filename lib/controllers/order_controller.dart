@@ -29,6 +29,11 @@ class OrderController extends GetxController {
       if (response.statusCode == 200) {
         orders.value = jsonDecode(response.body);
       }
+
+      if (response.statusCode == 401) {
+        Get.find<AuthController>().sessionExpired();
+        return;
+      }
     } catch (e) {
       print(e);
     } finally {

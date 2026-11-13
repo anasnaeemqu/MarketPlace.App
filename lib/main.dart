@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'screens/login_screen.dart';
+import 'screens/products_screen.dart';
 import 'controllers/auth_controller.dart';
 
-void main() {
-  Get.put(AuthController());
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final auth = Get.put(AuthController());
+  final loggedIn = await auth
+      .tryAutoLogin(); // read the notebook BEFORE drawing anything
+
+  runApp(MyApp(loggedIn: loggedIn));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool loggedIn;
+  const MyApp({super.key, required this.loggedIn});
 
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Marketplace',
       debugShowCheckedModeBanner: false,
-      home: LoginScreen(),
+      home: loggedIn ? const ProductsScreen() : LoginScreen(),
     );
   }
 }
