@@ -5,9 +5,11 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../screens/products_screen.dart';
 import '../screens/login_screen.dart';
+import '../config.dart';
 
 class AuthController extends GetxController {
-  final String baseUrl = 'http://localhost:5033/api';
+  // final String baseUrl = 'http://localhost:5033/api';
+  final String baseUrl = apiBaseUrl;
   String token = '';
   String userName = '';
   String userRole = '';

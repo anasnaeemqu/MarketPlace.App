@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import '../controllers/auth_controller.dart';
+import '../config.dart';
 
 class ProductController extends GetxController {
-  final String baseUrl = 'http://localhost:5033/api';
+  // final String baseUrl = 'http://localhost:5033/api';
+  final String baseUrl = apiBaseUrl;
   var products = [].obs;
   var filteredProducts = [].obs;
   var isLoading = true.obs;
