@@ -1,16 +1,18 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import '../controllers/auth_controller.dart';
 import '../config.dart';
+import '../widgets/common.dart';
+import 'auth_controller.dart';
 
 class ProductController extends GetxController {
-  // final String baseUrl = 'http://localhost:5033/api';
   final String baseUrl = apiBaseUrl;
-  var products = [].obs;
-  var filteredProducts = [].obs;
+
+  var products = [].obs; // everything from the server
+  var filteredProducts = [].obs; // what the screen shows (search + pill)
   var isLoading = true.obs;
   var searchQuery = ''.obs;
+  var activeFilter = 'All'.obs;
   var isSaving = false.obs;
   var myProducts = [].obs;
   var isLoadingMine = false.obs;
@@ -21,89 +23,24 @@ class ProductController extends GetxController {
     super.onInit();
   }
 
+  // ---------- reading ----------
+
   Future<void> fetchProducts() async {
     try {
       isLoading(true);
       final response = await http.get(Uri.parse('$baseUrl/Products'));
-
       if (response.statusCode == 200) {
-        products.value = jsonDecode(response.body);
-        filteredProducts.value = products; // 👈 Add this
+        products.value = jsonDecode(response.body) as List<dynamic>;
+        _applyFilters();
       }
     } catch (e) {
-      Get.snackbar('Error', 'Could not load products');
-      print(e);
+      showMsg(
+        'Could not load products',
+        'Check your connection and pull down to retry.',
+        error: true,
+      );
     } finally {
       isLoading(false);
-    }
-  }
-
-  // 👇 Add this method
-  void searchProducts(String query) {
-    searchQuery.value = query;
-    if (query.isEmpty) {
-      filteredProducts.value = products;
-    } else {
-      filteredProducts.value = products.where((product) {
-        final name = product['name'].toString().toLowerCase();
-        final description = product['description'].toString().toLowerCase();
-        final searchLower = query.toLowerCase();
-        return name.contains(searchLower) || description.contains(searchLower);
-      }).toList();
-    }
-  }
-
-  Future<void> addProduct(
-    String name,
-    String description,
-    double price,
-    int stock,
-  ) async {
-    if (isSaving.value) return; // 🚪 busy? walk away
-    isSaving(true); // 🔒 Occupied
-
-    try {
-      final token = Get.find<AuthController>().token;
-
-      final response = await http.post(
-        Uri.parse('$baseUrl/Products'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'name': name,
-          'description': description,
-          'price': price,
-          'stock': stock,
-          'vendorId': 'set-by-server',
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        await fetchProducts();
-        Get.back();
-        await Future.delayed(const Duration(milliseconds: 300));
-        Get.snackbar(
-          'Success',
-          'Product added!',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else {
-        Get.snackbar(
-          'Error',
-          'Could not add product',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Could not connect to server',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } finally {
-      isSaving(false); // 🔓 ALWAYS flip back
     }
   }
 
@@ -115,15 +52,110 @@ class ProductController extends GetxController {
         Uri.parse('$baseUrl/Products/mine'),
         headers: {'Authorization': 'Bearer $token'},
       );
-      print('Mine status: ${response.statusCode}');
-      print('Mine body: ${response.body}');
+      if (response.statusCode == 401) {
+        Get.find<AuthController>().sessionExpired();
+        return;
+      }
       if (response.statusCode == 200) {
-        myProducts.value = jsonDecode(response.body);
+        myProducts.value = jsonDecode(response.body) as List<dynamic>;
       }
     } catch (e) {
-      print(e);
+      showMsg('Could not load your products', 'Please try again.', error: true);
     } finally {
       isLoadingMine(false);
+    }
+  }
+
+  // ---------- search and filter ----------
+
+  void searchProducts(String query) {
+    searchQuery.value = query;
+    _applyFilters();
+  }
+
+  void setFilter(String filter) {
+    activeFilter.value = filter;
+    _applyFilters();
+  }
+
+  double _price(dynamic p) => (p['price'] as num).toDouble();
+  int _stock(dynamic p) => (p['stock'] as num).toInt();
+
+  void _applyFilters() {
+    Iterable<dynamic> list = products;
+
+    final q = searchQuery.value.trim().toLowerCase();
+    if (q.isNotEmpty) {
+      list = list.where(
+        (p) =>
+            p['name'].toString().toLowerCase().contains(q) ||
+            p['description'].toString().toLowerCase().contains(q),
+      );
+    }
+
+    if (activeFilter.value == 'In stock') {
+      list = list.where((p) => _stock(p) > 0);
+    }
+
+    final result = list.toList();
+    if (activeFilter.value == 'Price: low to high') {
+      result.sort((a, b) => _price(a).compareTo(_price(b)));
+    } else if (activeFilter.value == 'Price: high to low') {
+      result.sort((a, b) => _price(b).compareTo(_price(a)));
+    }
+
+    filteredProducts.value = result;
+  }
+
+  // ---------- writing ----------
+
+  Future<void> addProduct(
+    String name,
+    String description,
+    double price,
+    int stock, [
+    String? imageUrl,
+  ]) async {
+    if (isSaving.value) return;
+    isSaving(true);
+    try {
+      final token = Get.find<AuthController>().token;
+      final response = await http.post(
+        Uri.parse('$baseUrl/Products'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'name': name,
+          'description': description,
+          'price': price,
+          'stock': stock,
+          'imageUrl': imageUrl,
+          'vendorId': 'set-by-server', // the server replaces this
+        }),
+      );
+
+      if (response.statusCode == 401) {
+        Get.find<AuthController>().sessionExpired();
+        return;
+      }
+      if (response.statusCode == 200) {
+        await fetchProducts();
+        Get.back();
+        await Future.delayed(const Duration(milliseconds: 300));
+        showMsg('Product added', '$name is now in the store.');
+      } else {
+        showMsg('Could not add product', response.body, error: true);
+      }
+    } catch (e) {
+      showMsg(
+        'Could not connect',
+        'Check your connection and try again.',
+        error: true,
+      );
+    } finally {
+      isSaving(false);
     }
   }
 
@@ -132,8 +164,9 @@ class ProductController extends GetxController {
     String name,
     String description,
     double price,
-    int stock,
-  ) async {
+    int stock, [
+    String? imageUrl,
+  ]) async {
     if (isSaving.value) return;
     isSaving(true);
     try {
@@ -149,33 +182,29 @@ class ProductController extends GetxController {
           'description': description,
           'price': price,
           'stock': stock,
-          'vendorId':
-              'ignored-by-server', // model requires it, server ignores it
+          'imageUrl': imageUrl,
+          'vendorId': 'ignored-by-server',
         }),
       );
 
+      if (response.statusCode == 401) {
+        Get.find<AuthController>().sessionExpired();
+        return;
+      }
       if (response.statusCode == 200) {
         await fetchProducts();
         await fetchMyProducts();
         Get.back();
         await Future.delayed(const Duration(milliseconds: 300));
-        Get.snackbar(
-          'Success',
-          'Product updated!',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        showMsg('Changes saved', '$name was updated.');
       } else {
-        Get.snackbar(
-          'Error',
-          'Could not update product',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        showMsg('Could not save changes', response.body, error: true);
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Could not connect to server',
-        snackPosition: SnackPosition.BOTTOM,
+      showMsg(
+        'Could not connect',
+        'Check your connection and try again.',
+        error: true,
       );
     } finally {
       isSaving(false);
@@ -189,26 +218,23 @@ class ProductController extends GetxController {
         Uri.parse('$baseUrl/Products/$id'),
         headers: {'Authorization': 'Bearer $token'},
       );
+
+      if (response.statusCode == 401) {
+        Get.find<AuthController>().sessionExpired();
+        return;
+      }
       if (response.statusCode == 200) {
         await fetchProducts();
         await fetchMyProducts();
-        Get.snackbar(
-          'Deleted',
-          'Product removed',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        showMsg('Product deleted', 'It was removed from the store.');
       } else {
-        Get.snackbar(
-          'Error',
-          'Could not delete product',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        showMsg('Could not delete product', response.body, error: true);
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Could not connect to server',
-        snackPosition: SnackPosition.BOTTOM,
+      showMsg(
+        'Could not connect',
+        'Check your connection and try again.',
+        error: true,
       );
     }
   }
