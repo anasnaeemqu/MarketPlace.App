@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'controllers/auth_controller.dart';
 import 'screens/login_screen.dart';
 import 'screens/products_screen.dart';
-import 'controllers/auth_controller.dart';
+import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final auth = Get.put(AuthController());
-  final loggedIn = await auth
-      .tryAutoLogin(); // read the notebook BEFORE drawing anything
+  final loggedIn = await auth.tryAutoLogin(); // read the saved session first
 
   runApp(MyApp(loggedIn: loggedIn));
 }
@@ -23,7 +23,8 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'Marketplace',
       debugShowCheckedModeBanner: false,
-      home: loggedIn ? const ProductsScreen() : LoginScreen(),
+      theme: buildAppTheme(),
+      home: loggedIn ? const ProductsScreen() : const LoginScreen(),
     );
   }
 }
