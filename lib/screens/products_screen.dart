@@ -58,14 +58,16 @@ class ProductsScreen extends StatelessWidget {
                             ),
                             const SizedBox(width: 8),
                           ],
-                          _CircleAction(
-                            icon: Icons.receipt_long_outlined,
-                            tooltip: auth.userRole == 'Admin'
-                                ? 'All orders'
-                                : 'My orders',
-                            onTap: () => Get.to(() => const OrdersScreen()),
-                          ),
-                          const SizedBox(width: 8),
+                          if (auth.userRole != 'Vendor') ...[
+                            _CircleAction(
+                              icon: Icons.receipt_long_outlined,
+                              tooltip: auth.userRole == 'Admin'
+                                  ? 'All orders'
+                                  : 'My orders',
+                              onTap: () => Get.to(() => const OrdersScreen()),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
                           _CircleAction(
                             icon: Icons.logout,
                             tooltip: 'Log out',
