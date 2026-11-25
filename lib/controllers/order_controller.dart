@@ -1,168 +1,147 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:marketplace_app/controllers/product_controller.dart';
-import 'auth_controller.dart';
 import '../config.dart';
+import '../widgets/common.dart';
+import 'auth_controller.dart';
+import 'product_controller.dart';
 
 class OrderController extends GetxController {
-  // final String baseUrl = 'http://localhost:5033/api';
   final String baseUrl = apiBaseUrl;
+
   var orders = [].obs;
   var isLoading = false.obs;
-  var isPlacing = false.obs;
+  var isPlacing = false.obs; // the "Occupied" sign for the Place order button
 
-  @override
-  void onInit() {
-    fetchOrders();
-    super.onInit();
-  }
+  // The Orders screen calls fetchOrders() itself when it opens,
+  // so nothing is fetched here. That avoids a pointless request every time
+  // a product page is opened.
+
+  Map<String, String> get _authHeaders => {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ${Get.find<AuthController>().token}',
+  };
 
   Future<void> fetchOrders() async {
     try {
       isLoading(true);
-      final token = Get.find<AuthController>().token;
       final response = await http.get(
         Uri.parse('$baseUrl/Orders'),
-        headers: {'Authorization': 'Bearer $token'},
+        headers: _authHeaders,
       );
-      if (response.statusCode == 200) {
-        orders.value = jsonDecode(response.body);
-      }
 
       if (response.statusCode == 401) {
         Get.find<AuthController>().sessionExpired();
         return;
       }
+      if (response.statusCode == 200) {
+        orders.value = jsonDecode(response.body) as List<dynamic>;
+      }
     } catch (e) {
-      print(e);
+      showMsg(
+        'Could not load orders',
+        'Check your connection and try again.',
+        error: true,
+      );
     } finally {
       isLoading(false);
     }
   }
 
   Future<void> placeOrder(int productId, double price, int quantity) async {
-    if (isPlacing.value) return;
+    if (isPlacing.value) return; // someone is already inside, so walk away
     isPlacing(true);
     try {
-      print('placeOrder function started!');
-      final token = Get.find<AuthController>().token;
-      print('Token length: ${token.length}');
-
       final response = await http.post(
         Uri.parse('$baseUrl/Orders'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+        headers: _authHeaders,
+        // The server ignores the price and the customer id and uses its own.
         body: jsonEncode({
-          'customerId': 1,
           'items': [
             {'productId': productId, 'quantity': quantity, 'price': price},
           ],
         }),
       );
 
-      print('Order status: ${response.statusCode}');
-      print('Order body: ${response.body}');
-
+      if (response.statusCode == 401) {
+        Get.find<AuthController>().sessionExpired();
+        return;
+      }
       if (response.statusCode == 200) {
-        Get.find<ProductController>().fetchProducts();
+        // Stock went down on the server, so refresh the shelf on screen.
+        if (Get.isRegistered<ProductController>()) {
+          Get.find<ProductController>().fetchProducts();
+        }
         Get.back();
         await Future.delayed(const Duration(milliseconds: 300));
-        Get.snackbar(
-          'Success',
-          'Order placed successfully!',
-          snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 3),
-          backgroundColor: const Color(0xFF4CAF50),
-          colorText: const Color(0xFFFFFFFF),
-        );
+        showMsg('Order placed', 'You can follow it in My orders.');
       } else {
-        Get.snackbar(
-          'Error',
-          'Could not place order',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        showMsg('Could not place order', response.body, error: true);
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Could not connect to server',
-        snackPosition: SnackPosition.BOTTOM,
+      showMsg(
+        'Could not connect',
+        'Check your connection and try again.',
+        error: true,
       );
-      print(e);
     } finally {
-      isPlacing(false);
+      isPlacing(false); // always flip the sign back
     }
   }
 
   Future<void> updateStatus(int orderId, String newStatus) async {
     try {
-      final token = Get.find<AuthController>().token;
       final response = await http.put(
         Uri.parse('$baseUrl/Orders/$orderId/status'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+        headers: _authHeaders,
         body: jsonEncode({'status': newStatus}),
       );
 
+      if (response.statusCode == 401) {
+        Get.find<AuthController>().sessionExpired();
+        return;
+      }
       if (response.statusCode == 200) {
         await fetchOrders();
-        Get.snackbar(
-          'Updated',
-          'Order #$orderId is now $newStatus',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        showMsg('Order updated', 'Order #$orderId is now $newStatus.');
       } else {
-        Get.snackbar(
-          'Error',
-          response.body,
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        showMsg('Could not update order', response.body, error: true);
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Could not connect to server',
-        snackPosition: SnackPosition.BOTTOM,
+      showMsg(
+        'Could not connect',
+        'Check your connection and try again.',
+        error: true,
       );
     }
   }
 
   Future<void> cancelOrder(int orderId) async {
     try {
-      final token = Get.find<AuthController>().token;
       final response = await http.put(
         Uri.parse('$baseUrl/Orders/$orderId/cancel'),
-        headers: {'Authorization': 'Bearer $token'},
+        headers: _authHeaders,
       );
 
+      if (response.statusCode == 401) {
+        Get.find<AuthController>().sessionExpired();
+        return;
+      }
       if (response.statusCode == 200) {
         await fetchOrders();
+        // The items went back on the shelf, so refresh the product list too.
         if (Get.isRegistered<ProductController>()) {
-          Get.find<ProductController>().fetchProducts(); // stock is back
+          Get.find<ProductController>().fetchProducts();
         }
-        Get.snackbar(
-          'Cancelled',
-          'Order #$orderId was cancelled',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        showMsg('Order cancelled', 'Order #$orderId was cancelled.');
       } else {
-        Get.snackbar(
-          'Error',
-          response.body,
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        showMsg('Could not cancel order', response.body, error: true);
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Could not connect to server',
-        snackPosition: SnackPosition.BOTTOM,
+      showMsg(
+        'Could not connect',
+        'Check your connection and try again.',
+        error: true,
       );
     }
   }
