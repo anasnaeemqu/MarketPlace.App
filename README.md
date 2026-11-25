@@ -2,7 +2,7 @@
 
 A multi-vendor marketplace built with **Flutter** and **GetX**, backed by an ASP.NET Core API. Customers browse and buy, vendors list and manage their own products, and an admin moves orders from pending to delivered.
 
-> **Live demo:** _coming soon_ &nbsp;·&nbsp; **API repository:** [MarketPlace.API](https://github.com/YOUR-USERNAME/MarketPlace.API)
+> **Live demo:** _coming soon_ &nbsp;·&nbsp; **API repository:** [MarketPlace.API](https://github.com/anasnaeemqu/MarketPlace.API)
 
 ---
 
@@ -58,7 +58,7 @@ A multi-vendor marketplace built with **Flutter** and **GetX**, backed by an ASP
 | State and navigation | GetX |
 | HTTP | `http` package |
 | Saved session | `shared_preferences` |
-| Backend | [MarketPlace.API](https://github.com/YOUR-USERNAME/MarketPlace.API) (ASP.NET Core, JWT) |
+| Backend | [MarketPlace.API](https://github.com/anasnaeemqu/MarketPlace.API) (ASP.NET Core, JWT) |
 
 ---
 
@@ -67,7 +67,7 @@ A multi-vendor marketplace built with **Flutter** and **GetX**, backed by an ASP
 **You need:** the [Flutter SDK](https://docs.flutter.dev/get-started/install), Google Chrome, and the API running locally (see the API repository).
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/MarketPlace.App.git
+git clone https://github.com/anasnaeemqu/MarketPlace.App.git
 cd MarketPlace.App
 flutter pub get
 flutter run -d web-server --web-port=5000
